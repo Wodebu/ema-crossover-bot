@@ -4,14 +4,15 @@ from http.server import SimpleHTTPRequestHandler
 from socketserver import TCPServer
 import threading
 
-# 1. Start a dummy web server in the background to keep Render happy
+# 1. Start a dummy web server so Render doesn't shut us down
 def run_dummy_server():
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 10000))
     handler = SimpleHTTPRequestHandler
-    httpd = TCPServer(("", port), handler)
+    # Bind to 0.0.0.0 so Render can detect it
+    httpd = TCPServer(("0.0.0.0", port), handler)
     httpd.serve_forever()
 
 threading.Thread(target=run_dummy_server, daemon=True).start()
 
-# 2. Run your actual bot
+# 2. Start your bot
 subprocess.run(["python", "bot.py"])
